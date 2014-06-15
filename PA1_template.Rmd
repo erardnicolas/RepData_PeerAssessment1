@@ -41,7 +41,14 @@ averageInterval[which.max(averageInterval$sum),interval]
 ## Imputing missing values
 ```{r}
 missingValues<-!complete.cases(data$step)
+```
+Number of missing values in the dataset:
+```{r}
 sum(missingValues)
+```
+Impute missing values by taking the median of step numbers for each interval:
+
+```{r}
 imputedData<-data
 imputedData$steps<-as.double(imputedData$steps)
 
@@ -53,18 +60,25 @@ for (i in 1:length(missingValues))
         }
 
 hist(imputedData[,list(sum=sum(steps,na.rm=TRUE)),by=date]$sum,xlab="Number of steps",main="Number of steps taken each day")
+```
 
+Mean and median total number of steps after imputing missing values.
+```{r}
 mean(imputedData[,list(sum=sum(steps)),by=date]$sum)
 median(imputedData[,list(sum=sum(steps)),by=date]$sum)
 ```
-
+The mean is slightly higher than with the non-imputed data, the median is the same because we replaced the missing values by the median for each interval.
 ## Are there differences in activity patterns between weekdays and weekends?
 ```{r}
 library(lattice)
-
-weekdays(as.Date(data$date)) %in% c('Saturday','Sunday')
+```
+Add a day column to the data frame, TRUE means weekend, FALSE is weekday:
+```{r}
 imputedData[,days:=weekdays(as.Date(data$date)) %in% c('Saturday','Sunday')]
+```
 
+Tidy up the new data and make the plot:
+```{r}
 averageImputed<-imputedData[,list(mean=mean(steps)),by="days,interval"]
 averageImputed$days<-as.factor(averageImputed$days)
 levels(averageImputed$days) <- c("Weekday","Weekend")
